@@ -120,10 +120,12 @@ def backfill_all():
     conn = sqlite3.connect(config.DB_PATH)
     conn.row_factory = sqlite3.Row
     
-    # Find events with missing paths
+    # Find events with missing paths - JOIN with artifacts for source_url
     rows = conn.execute("""
-        SELECT id, source_url FROM events_image 
-        WHERE path_annotated IS NULL OR path_annotated = ''
+        SELECT e.id, a.source_url 
+        FROM events_image e
+        JOIN artifacts a ON e.artifact_id = a.id
+        WHERE e.path_annotated IS NULL OR e.path_annotated = ''
     """).fetchall()
     
     logging.info(f"Found {len(rows)} events to backfill")
@@ -144,7 +146,14 @@ def backfill_single(event_id):
     conn = sqlite3.connect(config.DB_PATH)
     conn.row_factory = sqlite3.Row
     
-    row = conn.execute("SELECT id, source_url FROM events_image WHERE id = ?", (event_id,)).fetchone()
+    # JOIN with artifacts table to get source_url
+    row = conn.execute("""
+        SELECT e.id, a.source_url 
+        FROM events_image e
+        JOIN artifacts a ON e.artifact_id = a.id
+        WHERE e.id = ?
+    """, (event_id,)).fetchone()
+    
     if not row:
         logging.error(f"Event {event_id} not found in events_image")
         return

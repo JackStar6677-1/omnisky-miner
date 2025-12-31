@@ -167,7 +167,9 @@ def render_detail_panel(row):
             st.warning("⚠️ Annotated PNG missing.")
             
             # BACKFILL BUTTON
-            if st.button(f"🛠️ Backfill Evidence for Event {row.get('event_id', 'N/A')}", key=f"backfill_{row.get('event_id')}"):
+            import time
+            unique_key = f"backfill_{row.get('event_id')}_{int(time.time())}"
+            if st.button(f"🛠️ Backfill Evidence for Event {row.get('event_id', 'N/A')}", key=unique_key):
                 import subprocess
                 result = subprocess.run(
                     ["python", "scripts/backfill_evidence.py", "--event-id", str(row.get('event_id'))],
