@@ -55,3 +55,16 @@ DIR_OUTPUT = DIR_CANDIDATES
 
 # Base de Datos
 DB_PATH = "omnisky.db"
+
+# --- COMPUTE / ACCELERATION SETTINGS ---
+USE_GPU = True         # Set to False to force CPU
+GPU_BACKEND = "cupy"   # Options: "cupy" (Recommended for RTX), "torch" (Future support)
+
+# --- NETWORK / TELEMETRY ---
+ENABLE_THROTTLING = False
+MAX_DOWNLOAD_MBPS = None # Unlimited
+DOWNLOAD_CHUNK_SIZE = 1024 * 256 # 256KB
+PLAN_MBPS = 800.0 # Tu plan de fibra
+TELEMETRY_INTERVAL_SEC = 1
+
+

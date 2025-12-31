@@ -91,8 +91,12 @@ class HeavyHarvester:
     def _generate_evidence(self, original_path, label):
         """
         Crea Waterfall PNG y NPZ snippet.
-        Must succeed or raise Exception to prevent 'cleanup' of raw file.
+        Must succeed or raise Exception.
+        Uses GPU Acceleration if available.
         """
+        from modules import compute_backend as cb
+        xp = cb.get_xp()
+        
         base_dir = config.DIR_CANDIDATES if label == "CANDIDATE" else config.DIR_RFI
         if label == "NOISE": base_dir = config.DIR_NOISE
         if not os.path.exists(base_dir): os.makedirs(base_dir)
@@ -100,14 +104,29 @@ class HeavyHarvester:
         base_name = os.path.basename(original_path)
         
         try:
-            # PNG Waterfall (Simulado)
-            png_path = os.path.join(base_dir, base_name + "_wf.png")
-            data_sim = np.random.rand(100, 100) # Replace with real waterfall data from 'path'
-            plt.imsave(png_path, data_sim, cmap='viridis')
+            # --- HEAVY COMPUTE SIMULATION ---
+            # Generate simulated raw data on GPU
+            # In a real scenario, we read H5 into GPU array here.
+            raw_data = xp.random.rand(1024, 256).astype(xp.float32)
             
-            # NPZ Data
+            # Simulated FFT / Beamforming Step
+            spectrum = xp.abs(xp.fft.fft2(raw_data))
+            
+            # Normalize (Min-Max)
+            spec_min = spectrum.min()
+            spec_max = spectrum.max()
+            normalized = (spectrum - spec_min) / (spec_max - spec_min + 1e-9)
+            
+            # Move back to CPU for Saving (Matplotlib/Numpy I/O)
+            data_cpu = cb.to_cpu(normalized)
+            
+            # --- SAVING ---
+            png_path = os.path.join(base_dir, base_name + "_wf.png")
+            # We save a subset for visual waterfall
+            plt.imsave(png_path, data_cpu[:256, :], cmap='viridis')
+            
             npz_path = os.path.join(base_dir, base_name + "_snippet.npz")
-            np.savez_compressed(npz_path, data=data_sim, meta="Mock Metadata")
+            np.savez_compressed(npz_path, data=data_cpu, meta=f"Backend: {cb._backend_name}")
             
             if not os.path.exists(png_path) or not os.path.exists(npz_path):
                 raise ValueError("Evidence files not created correctly.")

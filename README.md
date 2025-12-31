@@ -20,7 +20,31 @@ Sistema de minería de datos astronómicos (Radio & Visual) resiliente y autóno
    ```
    *El sistema aplicará migraciones automáticamente en el primer inicio.*
 
-3. Monitorización (Dashboard):
+## Aceleración GPU (Opcional)
+**Requisito:** Python 3.9 - 3.12 (Python 3.14 aún no tiene soporte de binarios GPU).
+
+Para habilitar el procesamiento masivo con tu **RTX 4060**:
+
+1. Asegúrate de tener **CUDA Toolkit 12.x** instalado.
+2. Instala CuPy:
+   ```bash
+   pip install cupy-cuda12x
+   ```
+   *(Si falla, es probable que tu versión de Python sea demasiado nueva. El sistema usará CPU automáticamente).*
+3. Verifica la activación:
+   ```bash
+   python scripts/bench_gpu.py
+   ```
+   *Si detecta la GPU, verás un "Speedup Factor" > 1.0x.*
+
+4. Configuración:
+   En `config.py`, asegúrate de:
+   ```python
+   USE_GPU = True
+   GPU_BACKEND = "cupy"
+   ```
+
+## Monitorización (Dashboard)
    ```bash
    streamlit run dashboard.py
    ```

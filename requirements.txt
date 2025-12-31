@@ -1,6 +1,8 @@
 streamlit
 pandas
+psutil
 plotly
+# cupy (Manual install required for GPU)
 noisereduce
 astroquery
 duckduckgo-search

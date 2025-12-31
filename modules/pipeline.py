@@ -5,8 +5,10 @@ import logging
 import concurrent.futures
 import config
 from .database_manager import DatabaseManager
+from modules.obs import Observability
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - PIPELINE - %(message)s')
+
 
 class PipelineManager:
     def __init__(self, heavy_harvester, image_harvester):
@@ -106,8 +108,10 @@ class PipelineManager:
                 # 4. Success -> Queue Analyze
                 self.db.update_artifact_status(art_id, "DOWNLOADED", path, fhash, size)
                 self.q_analyze.put((art_id, jtype))
+                Observability.log_event("DOWNLOAD_DONE", artifact_id=art_id, size=size)
             else:
                 self.db.update_artifact_status(art_id, "FAILED", error="Download returned None")
+                Observability.log_event("DOWNLOAD_FAIL", artifact_id=art_id, reason="Empty Path")
                 
         except Exception as e:
             self.db.update_artifact_status(art_id, "FAILED", error=str(e))
@@ -127,6 +131,8 @@ class PipelineManager:
         
         try:
             self.db.update_artifact_status(art_id, "ANALYZING")
+            Observability.log_event("ANALYZE_START", artifact_id=art_id, path=path)
+            Observability.update_status({"stage": "ANALYZING", "current": {"artifact_id": art_id}})
             
             result_data = None
             if jtype == "RADIO":

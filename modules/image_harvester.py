@@ -55,6 +55,9 @@ class ImageHarvester:
             from astropy.io import fits
             from astropy.stats import sigma_clipped_stats
             from astropy.wcs import WCS
+            from modules import compute_backend as cb
+            
+            xp = cb.get_xp() # Numpy or Cupy
             
             # 1. Read FITS
             score = 0
@@ -69,21 +72,27 @@ class ImageHarvester:
                         data = hdul[0].data
                         header = hdul[0].header
                         
-                        # WCS
+                        # WCS (Depends on CPU headers, so keeping on CPU)
                         w = WCS(header)
-                        # Get center pixel coords
                         center_x, center_y = data.shape[1]/2, data.shape[0]/2
                         sky = w.pixel_to_world(center_x, center_y)
                         ra = sky.ra.deg
                         dec = sky.dec.deg
                         
-                        # Background
-                        mean, median, std = sigma_clipped_stats(data, sigma=3.0)
+                        # GPU OFF-LOADING FOR STATS
+                        # Move data frame to GPU
+                        d_gpu = cb.to_gpu(np.nan_to_num(data))
                         
-                        # Detection (Simple Threshold)
-                        threshold = median + (5.0 * std)
-                        peak = np.max(data)
+                        # Simple GPU metrics (Astropy Sigma Clipping is complex to port fully, 
+                        # so we use a simplified GPU robust statistics)
+                        mean_g = xp.mean(d_gpu)
+                        std_g = xp.std(d_gpu)
+                        peak_g = xp.max(d_gpu)
                         
+                        # Back to CPU for scalar logic
+                        mean, std, peak = float(mean_g), float(std_g), float(peak_g)
+                        
+                        threshold = mean + (5.0 * std)
                         if peak > threshold:
                             score = min(100, (peak / std) * 2)
                             label = "VISUAL_SOURCE"
