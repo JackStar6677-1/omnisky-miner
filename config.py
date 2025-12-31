@@ -67,8 +67,20 @@ DOWNLOAD_CHUNK_SIZE = 1024 * 256 # 256KB
 PLAN_MBPS = 800.0 # Tu plan de fibra
 TELEMETRY_INTERVAL_SEC = 1
 
-# --- SOURCE PLUGINS (PRO) ---
+# --- SOURCE PLUGINS ---
 ENABLED_SOURCES = ["vlass_quicklook", "breakthrough_listen"]
 
-
-
+# --- DAEMON / BACKGROUND MODE ---
+DAEMON_ENABLED = True
+HEAVY_PROCESS_NAMES = [
+    "GTA5.exe", "FortniteClient-Win64-Shipping.exe", "Cyberpunk2077.exe", "RDR2.exe",
+    "blender.exe", "premiere.exe", "afterfx.exe", "davinciresolve.exe", "steam.exe"
+]
+PAUSE_CPU_PCT = 70
+PAUSE_RAM_PCT = 85
+PAUSE_GPU_PCT = 60 # Requires nvidia-smi
+PAUSE_GRACE_SECONDS = 10
+RESUME_COOLDOWN_SECONDS = 30
+FINISH_CURRENT_JOB_ON_PAUSE = True
+CHECK_INTERVAL_SECONDS = 3
+DAEMON_STATE_FILE = os.path.join(OMNISKY_ROOT, "OBS", "daemon_state.json")

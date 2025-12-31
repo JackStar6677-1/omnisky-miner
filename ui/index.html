@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniSky Command Center</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>🛰️ OmniSky Command Center</h1>
+        <div id="daemon-badge" class="badge idle">LOADING...</div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" data-tab="overview">📊 Overview</button>
+        <button class="nav-btn" data-tab="live">🖥️ Live Ops</button>
+        <button class="nav-btn" data-tab="explorer">🔎 Explorer</button>
+        <button class="nav-btn" data-tab="audio">🎧 Audio Lab</button>
+    </nav>
+
+    <main>
+        <!-- OVERVIEW TAB -->
+        <section id="tab-overview" class="tab-content active">
+            <div class="hud-grid">
+                <div class="hud-card">
+                    <span class="hud-label">Status</span>
+                    <span id="hud-status" class="hud-value">--</span>
+                </div>
+                <div class="hud-card">
+                    <span class="hud-label">Net (Mbps)</span>
+                    <span id="hud-net" class="hud-value">--</span>
+                </div>
+                <div class="hud-card">
+                    <span class="hud-label">CPU</span>
+                    <span id="hud-cpu" class="hud-value">--%</span>
+                </div>
+                <div class="hud-card">
+                    <span class="hud-label">RAM</span>
+                    <span id="hud-ram" class="hud-value">--%</span>
+                </div>
+            </div>
+            <div class="control-bar">
+                <button id="btn-pause" class="ctrl-btn pause">⏸️ Pause</button>
+                <button id="btn-resume" class="ctrl-btn resume">▶️ Resume</button>
+            </div>
+        </section>
+
+        <!-- LIVE OPS TAB -->
+        <section id="tab-live" class="tab-content">
+            <h2>📡 Event Stream</h2>
+            <div id="log-container" class="log-box"></div>
+        </section>
+
+        <!-- EXPLORER TAB -->
+        <section id="tab-explorer" class="tab-content">
+            <h2>🔎 Event Explorer</h2>
+            <table id="events-table">
+                <thead><tr><th>Type</th><th>ID</th><th>Label</th><th>ML Score</th><th>Created</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- AUDIO LAB TAB -->
+        <section id="tab-audio" class="tab-content">
+            <h2>🎧 Audio Lab</h2>
+            <audio id="audio-player" controls></audio>
+            <canvas id="spectrogram" width="600" height="150"></canvas>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
