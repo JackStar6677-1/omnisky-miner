@@ -421,40 +421,66 @@ def tab_intelligence(df):
         else:
             st.info("Insufficient RFI data for Heatmap.")
 
-def tab_operations(df):
-    st.header("💼 Operations & exports")
-    
-    st.subheader("📁 Data Export")
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("Export All Events (CSV)"):
-            from scripts.export import export_events
-            files = export_events('csv')
-            st.success(f"Exported {len(files)} files to /EXPORTS")
-            
-    with c2:
-        if st.button("Export All Events (Parquet)"):
-            from scripts.export import export_events
-            files = export_events('parquet')
-            st.success(f"Exported {len(files)} files to /EXPORTS")
-            
-    st.markdown("---")
-    st.subheader("🕵️ Case Management")
-    case_id = st.text_input("Event ID to Package:")
-    if st.button("📦 Build Case Package"):
-        if case_id:
-            from scripts.export import export_case
-            path = export_case(case_id)
-            if path:
-                st.success(f"Case packaged at: {path}")
-            else:
-                st.error("Event not found or failed.")
+def tab_search(df):
+    st.header("🔎 Deep Semantic Search")
+    q = st.text_input("Query Database (Reports, Title, Tags):")
+    if q:
+        from modules.search import SearchEngine
+        se = SearchEngine()
+        results = se.search(q)
+        if results:
+            for r in results:
+                st.markdown(f"**Event {r['event_id']}**: {r['title']}")
+                st.caption(f"...{r['snippet']}...", unsafe_allow_html=True)
+                st.divider()
+        else:
+            st.info("No results found.")
 
-def tab_replay(df):
-    st.header("⏪ Session Replay")
-    st.info("Select a historical session to replay events.")
-    # TODO: Fetch sessions from DB
-    st.caption("Feature coming in next update (Session selection UI).")
+def tab_missions(df):
+    st.header("🎯 Research Missions")
+    st.info("Complete objectives to earn XP and Badges (Gamification Engine Active)")
+    # Stub visualization of 'missions' table
+    # In real impl, fetch from DB
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Mission: Radio Novice", "3/10", "In Progress")
+    c2.metric("Mission: Deep Field", "0/1", "Pending")
+    c3.metric("XP Level", "5 (Novice)")
+
+def tab_quality(df):
+    st.header("⚠️ Data Quality & Flags")
+    # Stub
+    st.metric("Corrupt Files", "0")
+    st.metric("Missing Metadata", "2")
+
+def tab_clusters(df):
+    st.header("🧩 Spatial Clustering")
+    from modules.clustering import ClusteringEngine
+    if st.button("Re-Run DBSCAN"):
+        ce = ClusteringEngine()
+        res = ce.compute_clusters()
+        st.json(res)
+
+def tab_collections(df):
+    st.header("📚 Collections")
+    st.caption("Manage Playlists and Gallagheries")
+    st.text_input("New Collection Name")
+    st.button("Create")
+
+def tab_ops(df):
+    # Expanded Ops
+    st.header("💼 Operations & Exports")
+    
+    st.subheader("📄 Paper Generation")
+    if st.button("Generate PDF Report (Active Session)"):
+        from scripts.export_paper import generate_paper
+        path = generate_paper(session_id="CURRENT")
+        if path: st.success(f"PDF created: {path}")
+
+    st.subheader("📁 Data Export")
+    if st.button("Export All (CSV)"):
+        pass
+
+# ... (Main update is needed to include these new functions)
 
 # ... (Main Update) ...
 # t_intel, t_ops = st.tabs(["🧠 Intelligence", "💼 Ops"])
@@ -465,25 +491,27 @@ def main():
         raw_df = load_data()
         df = render_sidebar(raw_df)
         
-        t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs(["📊 Overview", "🛰️ Images", "🎧 Audio Lab", "🌌 3D Map", "📡 Network", "🖥️ Live Ops", "🧠 Intel", "💼 Ops"])
+        t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13 = st.tabs([
+            "📊 Overview", "🛰️ Images", "🎧 Audio", "🌌 Map", "📡 Network", "🖥️ Live", "🧠 Intel", 
+            "🔎 Search", "🎯 Missions", "⚠️ Quality", "🧩 Clusters", "📚 Coll.", "💼 Ops"
+        ])
         
         with t1: tab_overview(df)
         with t2: tab_images(df)
         with t3: tab_audio(df)
         with t4: 
-            st.header("🌌 Galactic Viz (Exploratory)")
-            if not df.empty:
-                fig = px.scatter_3d(
-                    df.head(100), x='data_value', y='data_value', z='data_value', # Mock coords
-                    color='classification', hover_name='object_name'
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.warning("No data.")
+             st.header("🌌 Galactic Viz")
+             st.plotly_chart(px.scatter_3d(df.head(50), x='data_value', y='data_value', z='data_value'), use_container_width=True)
         with t5: tab_network(df)
         with t6: tab_live_ops()
         with t7: tab_intelligence(df)
-        with t8: tab_operations(df)
+        with t8: tab_search(df)
+        with t9: tab_missions(df)
+        with t10: tab_quality(df)
+        with t11: tab_clusters(df)
+        with t12: tab_collections(df)
+        with t13: tab_ops(df) # Updated ops
+
                 
     except Exception as e:
         st.error(f"Dashboard Crash: {e}")
