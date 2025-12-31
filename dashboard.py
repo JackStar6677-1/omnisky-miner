@@ -165,6 +165,20 @@ def render_detail_panel(row):
             st.image(path_vis, caption=f"Visual Evidence: {os.path.basename(path_vis)}", use_container_width=True)
         elif row['type'] == 'IMAGE':
             st.warning("⚠️ Annotated PNG missing.")
+            
+            # BACKFILL BUTTON
+            if st.button(f"🛠️ Backfill Evidence for Event {row.get('event_id', 'N/A')}", key=f"backfill_{row.get('event_id')}"):
+                import subprocess
+                result = subprocess.run(
+                    ["python", "scripts/backfill_evidence.py", "--event-id", str(row.get('event_id'))],
+                    capture_output=True, text=True
+                )
+                if result.returncode == 0:
+                    st.success("✅ Backfill complete! Refresh page.")
+                    st.code(result.stdout)
+                else:
+                    st.error("Backfill failed:")
+                    st.code(result.stderr)
         
         # 2. Audio (WAV)
         path_aud, exists_aud, _ = UIDataLoader.resolve_path(row.get('path_audio_raw'))
