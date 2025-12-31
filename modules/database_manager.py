@@ -203,3 +203,66 @@ class DatabaseManager:
         
         conn.commit()
         conn.close()
+    # --- SESSION MANAGEMENT (PRO) ---
+    def create_session(self, config_snapshot=None):
+        import uuid
+        import json
+        session_id = str(uuid.uuid4())
+        start_time = datetime.datetime.now().isoformat()
+        if config_snapshot is None: config_snapshot = {}
+        
+        conn = self.get_connection()
+        try:
+            conn.execute(
+                "INSERT INTO sessions (id, start_time, config_snapshot, status) VALUES (?, ?, ?, ?)",
+                (session_id, start_time, json.dumps(config_snapshot), "ACTIVE")
+            )
+            conn.commit()
+            logging.info(f"🟢 Session Started: {session_id}")
+            return session_id
+        except Exception as e:
+            logging.error(f"Failed to start session: {e}")
+            return None
+        finally:
+            conn.close()
+
+    def end_session(self, session_id):
+        end_time = datetime.datetime.now().isoformat()
+        conn = self.get_connection()
+        try:
+            conn.execute(
+                "UPDATE sessions SET end_time = ?, status = ? WHERE id = ?",
+                (end_time, "COMPLETED", session_id)
+            )
+            conn.commit()
+            logging.info(f"🔴 Session Ended: {session_id}")
+        except Exception as e:
+            logging.error(f"Failed to end session: {e}")
+        finally:
+            conn.close()
+
+    def get_or_create_family(self, signature_hash, representative_event_id=None):
+        import uuid
+        conn = self.get_connection()
+        c = conn.cursor()
+        try:
+            # Check existing
+            c.execute("SELECT id FROM event_families WHERE signature_hash = ?", (signature_hash,))
+            row = c.fetchone()
+            if row:
+                return row[0]
+            
+            # Create new
+            fam_id = str(uuid.uuid4())
+            ts = datetime.datetime.now().isoformat()
+            c.execute(
+                "INSERT INTO event_families (id, signature_hash, first_seen_at, representative_event_id) VALUES (?, ?, ?, ?)",
+                (fam_id, signature_hash, ts, representative_event_id)
+            )
+            conn.commit()
+            return fam_id
+        except Exception as e:
+            logging.error(f"Family Error: {e}")
+            return None
+        finally:
+            conn.close()

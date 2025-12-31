@@ -1,6 +1,7 @@
 streamlit
 pandas
 psutil
+scikit-learn
 plotly
 # cupy (Manual install required for GPU)
 noisereduce

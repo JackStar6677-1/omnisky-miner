@@ -6,6 +6,8 @@ import concurrent.futures
 import config
 from .database_manager import DatabaseManager
 from modules.obs import Observability
+from modules.triage import TriageEngine
+from modules.deduplication import DeduplicationEngine
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - PIPELINE - %(message)s')
 
@@ -15,6 +17,7 @@ class PipelineManager:
         self.db = DatabaseManager()
         self.heavy = heavy_harvester
         self.image = image_harvester
+        self.triage = TriageEngine()
         
         # Queues
         self.q_download = queue.Queue(maxsize=config.QUEUE_SIZE * 2)
@@ -102,6 +105,9 @@ class PipelineManager:
                     logging.info(f"♻️ Duplicate Hash {fhash[:8]}. Skipping.")
                     self.db.update_artifact_status(art_id, "DUPLICATE", path, fhash, size)
                     # Cleanup
+                    self.db.update_artifact_status(art_id, "DUPLICATE", path, fhash, size)
+                    
+                    # FORENSIC: Only cleanup if not flagged for retention (duplicates usually trash)
                     self.heavy.cleanup(path)
                     return
                 

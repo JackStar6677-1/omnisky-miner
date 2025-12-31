@@ -133,13 +133,25 @@ def render_detail_panel(row):
     c3.markdown(f"**Origin:** `{origin_badge}`")
     
     # Metrics
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Classification", row['classification'])
-    m2.metric(row.get('value_unit', 'Value'), f"{row['data_value']:.2f}")
-    m3.metric("Frequency/Band", f"{row.get('frequency', 0):.2f} MHz" if row['type'] == 'RADIO' else "N/A")
-    m4.metric("Timestamp", str(row['timestamp']).split('.')[0])
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1.metric("Type", row['type'])
+    c2.metric("Origin", "✅ REAL DATA" if row['data_origin'] == "REAL" else "🛠️ TEST/LEGACY")
     
-    st.divider()
+    c3.metric("Classification", row['classification'])
+    c4.metric(row.get('value_unit', 'Value'), f"{row['data_value']:.2f}")
+    c5.metric("Frequency/Band", f"{row.get('frequency', 0):.2f} MHz" if row['type'] == 'RADIO' else "N/A")
+    
+    # PRO: ML Metrics
+    ml_score = row.get('ml_score', None)
+    ml_label = row.get('ml_label', 'N/A')
+    if ml_score is not None:
+        c6.metric("ML Triage Score", f"{ml_score:.1f}%", delta=ml_label)
+    else:
+        c6.metric("ML Triage", "Pending/N/A")
+
+    st.caption(f"Timestamp: {row['timestamp']}")
+    
+    st.markdown("---")
     
     # Evidence Section
     c_media, c_meta = st.columns([2, 1])
@@ -380,16 +392,80 @@ def tab_live_ops():
                 
                 col_msg.markdown(msg)
 
-# ... (Inside main) ...
-# t1, t2, t3, t4, t5, t6 = st.tabs(["📊 Overview", "🛰️ Images", "🎧 Audio Lab", "🌌 3D Map", "📡 Network", "🖥️ Live Ops"])
-# with t6: tab_live_ops()
+# --- PRO TABS ---
+
+def tab_intelligence(df):
+    st.header("🧠 Artificial Intelligence Core")
+    
+    # 1. Triage Model Status
+    c1, c2 = st.columns(2)
+    with c1:
+        st.subheader("🤖 Triage Engine")
+        from modules.triage import TriageEngine
+        engine = TriageEngine()
+        st.metric("Model Status", "Active" if engine.is_ready else "Heuristic Fallback")
+        if st.button("Re-Train Model (Dummy)"):
+            try:
+                msg = engine.train_dummy()
+                st.success(msg)
+            except Exception as e:
+                st.error(str(e))
+                
+    with c2:
+        st.subheader("🛑 RFI Intelligence")
+        from modules.rfi_intel import RFIIntelligence
+        heatmap = RFIIntelligence.get_frequency_heatmap()
+        if heatmap is not None and not heatmap.empty:
+            fig = px.bar(heatmap, x='freq_bin', y='count', title="RFI Density by Frequency (MHz)")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Insufficient RFI data for Heatmap.")
+
+def tab_operations(df):
+    st.header("💼 Operations & exports")
+    
+    st.subheader("📁 Data Export")
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("Export All Events (CSV)"):
+            from scripts.export import export_events
+            files = export_events('csv')
+            st.success(f"Exported {len(files)} files to /EXPORTS")
+            
+    with c2:
+        if st.button("Export All Events (Parquet)"):
+            from scripts.export import export_events
+            files = export_events('parquet')
+            st.success(f"Exported {len(files)} files to /EXPORTS")
+            
+    st.markdown("---")
+    st.subheader("🕵️ Case Management")
+    case_id = st.text_input("Event ID to Package:")
+    if st.button("📦 Build Case Package"):
+        if case_id:
+            from scripts.export import export_case
+            path = export_case(case_id)
+            if path:
+                st.success(f"Case packaged at: {path}")
+            else:
+                st.error("Event not found or failed.")
+
+def tab_replay(df):
+    st.header("⏪ Session Replay")
+    st.info("Select a historical session to replay events.")
+    # TODO: Fetch sessions from DB
+    st.caption("Feature coming in next update (Session selection UI).")
+
+# ... (Main Update) ...
+# t_intel, t_ops = st.tabs(["🧠 Intelligence", "💼 Ops"])
+
 
 def main():
     try:
         raw_df = load_data()
         df = render_sidebar(raw_df)
         
-        t1, t2, t3, t4, t5, t6 = st.tabs(["📊 Overview", "🛰️ Images", "🎧 Audio Lab", "🌌 3D Map", "📡 Network", "🖥️ Live Ops"])
+        t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs(["📊 Overview", "🛰️ Images", "🎧 Audio Lab", "🌌 3D Map", "📡 Network", "🖥️ Live Ops", "🧠 Intel", "💼 Ops"])
         
         with t1: tab_overview(df)
         with t2: tab_images(df)
@@ -406,6 +482,8 @@ def main():
                 st.warning("No data.")
         with t5: tab_network(df)
         with t6: tab_live_ops()
+        with t7: tab_intelligence(df)
+        with t8: tab_operations(df)
                 
     except Exception as e:
         st.error(f"Dashboard Crash: {e}")

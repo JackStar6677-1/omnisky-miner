@@ -67,4 +67,8 @@ DOWNLOAD_CHUNK_SIZE = 1024 * 256 # 256KB
 PLAN_MBPS = 800.0 # Tu plan de fibra
 TELEMETRY_INTERVAL_SEC = 1
 
+# --- SOURCE PLUGINS (PRO) ---
+ENABLED_SOURCES = ["vlass_quicklook", "breakthrough_listen"]
+
+
 
