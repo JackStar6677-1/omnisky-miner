@@ -1,0 +1,12 @@
+streamlit
+pandas
+plotly
+noisereduce
+astroquery
+duckduckgo-search
+astropy
+scipy
+matplotlib
+numpy
+beautifulsoup4
+requests

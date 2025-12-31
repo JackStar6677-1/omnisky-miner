@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+venv/
+env/
+
+# OmniSky Data (Keep repo light)
+OMNISKY_DATA/
+omnisky.db
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# Streamlit
+.streamlit/
