@@ -74,7 +74,8 @@ ENABLED_SOURCES = ["vlass_quicklook", "breakthrough_listen"]
 DAEMON_ENABLED = True
 HEAVY_PROCESS_NAMES = [
     "GTA5.exe", "FortniteClient-Win64-Shipping.exe", "Cyberpunk2077.exe", "RDR2.exe",
-    "blender.exe", "premiere.exe", "afterfx.exe", "davinciresolve.exe", "steam.exe"
+    "blender.exe", "premiere.exe", "afterfx.exe", "davinciresolve.exe",
+    "Valorant.exe", "LeagueofLegends.exe", "VALORANT-Win64-Shipping.exe"
 ]
 PAUSE_CPU_PCT = 70
 PAUSE_RAM_PCT = 85

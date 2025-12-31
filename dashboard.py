@@ -31,6 +31,55 @@ def clear_cache():
 def render_sidebar(df):
     st.sidebar.title("🛸 Station Controls")
     
+    # DAEMON STATUS BADGE
+    try:
+        import json
+        state_path = os.path.join(config.OMNISKY_ROOT, "OBS", "daemon_state.json")
+        if os.path.exists(state_path):
+            with open(state_path, 'r') as f:
+                dstate = json.load(f)
+            
+            state_labels = {
+                "RUNNING": ("🟢 RUNNING", "success"),
+                "PAUSED": ("⏸️ PAUSED", "warning"),
+                "IDLE": ("💤 IDLE", "info")
+            }
+            lbl, color = state_labels.get(dstate.get('daemon_state'), ("⚪ UNKNOWN", "secondary"))
+            reason = dstate.get('pause_reason', '')
+            st.sidebar.success(f"**Daemon:** {lbl}")
+            if reason and reason != "SYSTEM_OK":
+                st.sidebar.caption(f"Reason: {reason}")
+                
+            # CONTROL BUTTONS
+            col_ctrl1, col_ctrl2 = st.sidebar.columns(2)
+            if col_ctrl1.button("▶️ Resume", key="ctrl_resume", use_container_width=True):
+                control_data = {"desired_state": "RUNNING", "reason": "USER_DASHBOARD", "updated_at": time.time()}
+                control_path = os.path.join(config.OMNISKY_ROOT, "OBS", "control.json")
+                os.makedirs(os.path.dirname(control_path), exist_ok=True)
+                with open(control_path, 'w') as f:
+                    json.dump(control_data, f)
+                st.sidebar.success("▶️ Resume sent!")
+                st.rerun()
+                
+            if col_ctrl2.button("⏸️ Pause", key="ctrl_pause", use_container_width=True):
+                control_data = {"desired_state": "PAUSED", "reason": "USER_DASHBOARD", "updated_at": time.time()}
+                control_path = os.path.join(config.OMNISKY_ROOT, "OBS", "control.json")
+                os.makedirs(os.path.dirname(control_path), exist_ok=True)
+                with open(control_path, 'w') as f:
+                    json.dump(control_data, f)
+                st.sidebar.warning("⏸️ Pause sent!")
+                st.rerun()
+        else:
+            st.sidebar.warning("⚪ Daemon OFFLINE")
+            if st.sidebar.button("🚀 Start Daemon", key="ctrl_start"):
+                import subprocess
+                subprocess.Popen(["pythonw", "services/daemon.py"], cwd=config.OMNISKY_ROOT)
+                st.sidebar.success("Daemon starting...")
+                time.sleep(1)
+                st.rerun()
+    except Exception as e:
+        st.sidebar.error(f"Daemon status error: {e}")
+
     # Global Filters
     st.sidebar.subheader("🔎 Data Filters")
     show_test = st.sidebar.checkbox("Show TEST/LEGACY Data", value=False)
