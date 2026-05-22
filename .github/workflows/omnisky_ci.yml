@@ -1,0 +1,61 @@
+name: OmniSky Miner CI & Scheduled Signal Seeker
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours to scan and process signals
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0' # Adjust as per C# version needed
+
+      - name: Restore and Build C# Agent
+        run: |
+          dotnet restore agent-win/OmniSky.Agent/OmniSky.Agent.csproj
+          dotnet build agent-win/OmniSky.Agent/OmniSky.Agent.csproj --configuration Release
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-run-archive: '3.11'
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Install PyTorch CPU for fast testing in CI
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Run Reorganization Check
+        run: |
+          if (Test-Path "verify_*.py") {
+              Write-Error "❌ Found verify scripts in root! Reorganization failed."
+          } else {
+              Write-Host "✅ Root is clean (verify scripts successfully moved)."
+          }
+        shell: powershell
+
+      - name: Run Install Verification
+        run: |
+          python tests/verify_install.py
+
+      - name: Run Pro Features Verification
+        run: |
+          python tests/verify_pro_features.py
+
+      - name: Run Signal Search & Pipeline Processing (E2E)
+        run: |
+          python tests/verify_run.py

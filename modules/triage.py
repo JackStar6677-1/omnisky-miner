@@ -12,13 +12,22 @@ MODEL_PATH = os.path.join(config.OMNISKY_ROOT, "models", "triage.pkl")
 class TriageEngine:
     """
     Local Machine Learning Engine for Event Classification.
-    Uses Scikit-Learn.
+    Integrates a PyTorch 2D CNN model when spectrograms are available,
+    falling back to a classical Scikit-Learn Random Forest or Heuristics.
     """
     
     def __init__(self):
         self.model = None
         self.is_ready = False
         self._load_model()
+        
+        # Load Deep Learning (PyTorch CNN) Engine
+        try:
+            from modules.triage_nn import DeepTriageEngine
+            self.deep_engine = DeepTriageEngine()
+        except Exception as e:
+            logging.warning(f"Could not load DeepTriageEngine: {e}")
+            self.deep_engine = None
         
     def _load_model(self):
         if os.path.exists(MODEL_PATH):
@@ -32,7 +41,7 @@ class TriageEngine:
             logging.info("🧠 No ML model found. Triage running in Heuristic Mode.")
             
     def train_dummy(self):
-        """Trains a initial dummy model to enable the feature."""
+        """Trains an initial dummy model to enable the feature."""
         # Fake data just to have a valid .pkl structure
         X = [[10, 0.0], [5, 1.0], [2, 0.5], [50, 0.0]] # SNR, Drift
         y = ["NOISE", "CANDIDATE", "NOISE", "CANDIDATE"]
@@ -46,23 +55,39 @@ class TriageEngine:
         joblib.dump(clf, MODEL_PATH)
         self.model = clf
         self.is_ready = True
+        
+        # Also ensure deep learning dummy weights exist
+        if self.deep_engine:
+            self.deep_engine.train_dummy()
+            
         return "Dummy Model Trained"
 
     def analyze(self, features: dict) -> dict:
         """
-        Returns {score: 0-100, label: str, confidence: float, method: 'ML'|'HEURISTIC'}
+        Returns {score: 0-100, label: str, confidence: float, method: 'ML'|'HEURISTIC'|'DEEP_CNN'}
         """
-        # 1. Feature Extraction / Cleaning
         try:
+            # 1. Check if a spectrogram is provided and deep engine is ready
+            spectrogram = features.get('spectrogram')
+            if spectrogram is not None and self.deep_engine and self.deep_engine.is_ready:
+                try:
+                    prob = self.deep_engine.predict(spectrogram)
+                    return {
+                        "score": prob * 100,
+                        "label": "CANDIDATE" if prob >= 0.5 else "NOISE",
+                        "confidence": prob,
+                        "method": "DEEP_CNN"
+                    }
+                except Exception as e:
+                    logging.warning(f"Deep CNN classification failed: {e}. Falling back to classical ML.")
+
+            # 2. Classic ML / Heuristic Fallback
             snr = float(features.get('snr', 0) or features.get('sigma', 0))
             drift = abs(float(features.get('drift', 0)))
             
             # ML Prediction
             if self.is_ready and self.model:
                 try:
-                    # Input vector must match training. This is a simplification.
-                    # In real pro app, we use a named feature vector or DictVectorizer.
-                    # For minimal implementation we assume [snr, drift]
                     vector = [[snr, drift]]
                     pred_label = self.model.predict(vector)[0]
                     pred_prob = np.max(self.model.predict_proba(vector))
@@ -73,7 +98,7 @@ class TriageEngine:
                         "confidence": pred_prob,
                         "method": "ML_RF"
                     }
-                except:
+                except Exception:
                     pass # Fallback to Heuristic
             
             # Heuristic Fallback

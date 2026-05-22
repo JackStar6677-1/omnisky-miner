@@ -143,6 +143,12 @@ class PipelineManager:
             result_data = None
             if jtype == "RADIO":
                 result_data = self.heavy.analyze_granular(path)
+                if result_data:
+                    # Run ML/Deep Triage over features and spectrogram
+                    triage_res = self.triage.analyze(result_data)
+                    result_data['label'] = triage_res['label']
+                    result_data['score'] = triage_res['score']
+                    result_data['triage_method'] = triage_res['method']
             else:
                 result_data = self.image.analyze_granular(path)
                 
@@ -162,6 +168,38 @@ class PipelineManager:
         art_id, jtype, result, path = data
         
         try:
+            # 1. Trigger IPFS backup and alert if candidate is found
+            if result and result.get("label") == "CANDIDATE":
+                try:
+                    from modules.ipfs_backup import IPFSBackupEngine
+                    from modules.alerts import AlertManager
+                    
+                    ipfs = IPFSBackupEngine()
+                    am = AlertManager()
+                    
+                    # Gather evidence files
+                    files = []
+                    wf = result.get('waterfall_path')
+                    npz = result.get('npz_path')
+                    if wf: files.append(wf)
+                    if npz: files.append(npz)
+                    
+                    cid = ipfs.backup_event(art_id, files, metadata=result)
+                    result['ipfs_cid'] = cid
+                    
+                    # Send candidate alert (which triggers telescope slew follow-up via alerts.py)
+                    am.send_alert("CRITICAL", f"New candidate found! IPFS CID: {cid}", result)
+                except Exception as e:
+                    logging.error(f"IPFS/Alert processing failed for candidate: {e}")
+            elif result and result.get("label") == "RFI":
+                try:
+                    from modules.alerts import AlertManager
+                    am = AlertManager()
+                    am.send_alert("WARNING", f"RFI detected on frequency {result.get('fch1')}", result)
+                except Exception:
+                    pass
+
+            # 2. Persist in database
             if jtype == "RADIO":
                 self.db.log_radio_event(art_id, result)
             else:

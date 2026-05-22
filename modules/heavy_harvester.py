@@ -82,7 +82,8 @@ class HeavyHarvester:
                 'waterfall_path': evidence['waterfall'],
                 'npz_path': evidence['npz'],
                 'audio_raw': audio_raw,
-                'audio_clean': audio_clean
+                'audio_clean': audio_clean,
+                'spectrogram': evidence['spectrogram']
             }
         except Exception as e:
             logging.error(f"Analysis failed {path}: {e}")
@@ -131,7 +132,7 @@ class HeavyHarvester:
             if not os.path.exists(png_path) or not os.path.exists(npz_path):
                 raise ValueError("Evidence files not created correctly.")
                 
-            return {'waterfall': png_path, 'npz': npz_path}
+            return {'waterfall': png_path, 'npz': npz_path, 'spectrogram': data_cpu}
             
         except Exception as e:
             logging.error(f"CRITICAL: Failed to generate evidence for {base_name}. Raw file will NOT be safe to delete.")

@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import os
 import time
 import sqlite3
@@ -19,11 +23,38 @@ def verify_run():
     c = conn.cursor()
     c.execute("SELECT * FROM schema_migrations")
     print(f"    Migraciones aplicadas: {c.fetchall()}")
+    
+    # Clean up tables for a fresh E2E run
+    try:
+        c.execute("DELETE FROM events_radio")
+        c.execute("DELETE FROM events_image")
+        c.execute("DELETE FROM alerts")
+        c.execute("DELETE FROM artifacts")
+        c.execute("DELETE FROM hallazgos")
+        conn.commit()
+        print("    [CLEANUP] Base de datos limpiada para una prueba limpia.")
+    except Exception as e:
+        print(f"    [CLEANUP] No se pudieron limpiar las tablas: {e}")
     conn.close()
     
     # 2. Setup Components
     print("[2] Configurando Pipeline...")
     heavy = HeavyHarvester()
+    
+    def mock_download_granular(url):
+        print(f"    [MOCK] Simulando descarga de: {url}")
+        import hashlib
+        filename = os.path.basename(url)
+        if not filename.endswith(('.h5', '.fil')): filename += ".h5"
+        path = os.path.join(config.DIR_TEMP, filename)
+        content = b"MOCK_H5_DATA" * 1024
+        h = hashlib.sha256(content).hexdigest()
+        with open(path, 'wb') as f:
+            f.write(content)
+        return path, h, len(content)
+        
+    heavy.download_granular = mock_download_granular
+    
     image = ImageHarvester()
     pipeline = PipelineManager(heavy, image)
     pipeline.start()
