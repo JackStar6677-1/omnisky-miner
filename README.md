@@ -63,16 +63,22 @@ graph TD
     classDef agent fill:#2c1b4d,stroke:#d4af37,stroke-width:2px,color:#fff;
     classDef db fill:#08040f,stroke:#da70d6,stroke-width:1px,color:#fff;
     
-    A["Interfaz Web (Vite + JS)<br/>(Command Center HUD)"] :::ui
-    B["FastAPI Backend (Python)<br/>(Control de Flujo e Ingesta)"] :::backend
-    C["Agente Windows (C# .NET 8)<br/>(Monitor de Procesos y Bandeja System Tray)"] :::agent
-    D["SQLite Database (Schema v5)<br/>(Sesiones, Alertas, ML Runs y Eventos)"] :::db
-    E["Pipeline de Triage (Scikit-Learn)<br/>(ML RF Model / Heurísticas)"] :::backend
+    A["Interfaz Web (Vite + JS)<br/>(Command Center HUD)"]
+    B["FastAPI Backend (Python)<br/>(Control de Flujo e Ingesta)"]
+    C["Agente Windows (C# .NET 8)<br/>(Monitor de Procesos y Bandeja System Tray)"]
+    D["SQLite Database (Schema v5)<br/>(Sesiones, Alertas, ML Runs y Eventos)"]
+    E["Pipeline de Triage (Scikit-Learn)<br/>(ML RF Model / Heurísticas)"]
     
     A <-->|REST API / WebSockets| B
     C <-->|Daemon Control API / status| B
     B <-->|Lectura/Escritura SQL| D
     B -->|Score de Señales| E
+    
+    class A ui;
+    class B backend;
+    class C agent;
+    class D db;
+    class E backend;
     
     subgraph Frontend & UI
         A
