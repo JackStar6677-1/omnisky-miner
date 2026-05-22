@@ -24,7 +24,10 @@ Una vez iniciado, abre tu navegador web en: **[http://127.0.0.1:8000](http://127
 
 ### 1. Estación de Investigación (Research Station)
 *   **Descubrimiento Multi-Fuente:** Conectores modulares a repositorios de datos astrofísicos reales como **VLASS** (VLA Sky Survey) y **Breakthrough Listen** (Green Bank / Parkes).
-*   **Triage con Machine Learning:** Clasificador local *RandomForest* entrenado automáticamente para puntuar señales candidatas y descartar interferencias antropogénicas (RFI).
+*   **Triage con Machine Learning (PyTorch CNN):** Clasificador avanzado mediante red convolucional 2D en `modules/triage_nn.py` (con fallback dinámico a heurísticas de bosque aleatorio si PyTorch no está instalado).
+*   **Aceleración por GPU (CUDA/CuPy):** Auto-detección del hardware NVIDIA RTX e instalador inteligente de dependencias de aceleración matricial GPU en `scripts/install_gpu_deps.ps1`.
+*   **Backups IPFS Descentrados:** Compresión de cascadas visuales, NPZ y metadatos en un archivo ZIP de evidencia que se publica de forma autónoma en la red descentralizada IPFS o gateways públicos (`modules/ipfs_backup.py`).
+*   **Obs-Bridge Slew Follow-up:** Conexión en tiempo real (`modules/obs_bridge.py`) que escucha alertas críticas, traduce coordenadas astronómicas RA/DEC a Az/El locales y comanda al simulador `AstroControlSim` para re-apuntar las antenas automáticamente.
 *   **Búsqueda Semántica:** Buscador de texto completo integrado mediante bases de datos SQLite FTS5 para agrupar reportes astrofísicos históricos.
 *   **Agrupamiento Espacial (Clustering):** Algoritmo DBSCAN para detectar puntos calientes (hotspots) de señales sospechosas recurrentes en coordenadas celestes.
 *   **Gamificación Científica:** Misiones de investigación interactivas con recompensas de XP para motivar al operador humano en el análisis visual.
@@ -116,19 +119,19 @@ Puedes correr la suite de verificación completa para auditar la integridad del 
 $env:PYTHONIOENCODING = "utf-8"
 
 # 1. Verificar base de datos e instalación básica
-venv\Scripts\python.exe verify_install.py
+venv\Scripts\python.exe tests/verify_install.py
 
 # 2. Verificar base de datos, migraciones (v1 a v5) y entrenamiento ML RandomForest
-venv\Scripts\python.exe verify_pro_features.py
+venv\Scripts\python.exe tests/verify_pro_features.py
 
 # 3. Verificar el pipeline end-to-end de descarga, limpieza y triaje de archivos FITS/H5
-venv\Scripts\python.exe verify_run.py
+venv\Scripts\python.exe tests/verify_run.py
 
 # 4. Verificar síntesis de audio a WAV para análisis inmersivo de espectros
-venv\Scripts\python.exe verify_immersion.py
+venv\Scripts\python.exe tests/verify_immersion.py
 
 # 5. Verificar sensor de pausa por consumo y carga pesada (Daemon Engine)
-venv\Scripts\python.exe verify_daemon_pause.py
+venv\Scripts\python.exe tests/verify_daemon_pause.py
 ```
 
 *Todos los scripts de verificación se ejecutan actualmente con un 100% de éxito (PASS).*
