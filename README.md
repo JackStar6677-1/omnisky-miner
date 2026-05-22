@@ -98,6 +98,48 @@ graph TD
     end
 ```
 
+### Pipeline de Triage y Flujo de Clasificación Machine Learning
+
+El agente procesa señales continuas y las analiza para buscar candidatos a tecnofirmas siguiendo este flujo tecnológico:
+
+```mermaid
+flowchart TD
+    subgraph DataSources ["Fuentes de Datos Cósmicos"]
+        VLASS["VLA Sky Survey (FITS/H5)"]
+        BL["Breakthrough Listen (H5/GP)"]
+    end
+
+    subgraph Pipeline ["Pipeline de Ingesta (triage_nn.py)"]
+        Download["Descarga y Limpieza (Astropy/Scipy)"]
+        Extract["Extracción de Features (SNR, Frecuencia, Drift)"]
+        
+        subgraph Classifier ["Detector de Señales"]
+            direction TB
+            ML_Model{"¿PyTorch con CUDA?"}
+            PyTorchCNN["Red Convolucional 2D (Espectrogramas)"]
+            RF_Model["Random Forest (Scikit-Learn)"]
+            Heuristics["Filtro Heurístico Básico"]
+            
+            ML_Model -->|Sí| PyTorchCNN
+            ML_Model -->|No| RF_Model
+            RF_Model -->|Fallback| Heuristics
+        end
+    end
+
+    subgraph Storage ["Persistencia e Integración"]
+        DB[("SQLite FTS5\nSesiones y Hallazgos")]
+        IPFS["Respaldo IPFS (ipfs_backup.py)\n(ZIP + Espectrogramas)"]
+        SlewBridge["Obs-Bridge (AstroControlSim)\nRe-apuntamiento automático"]
+    end
+
+    VLASS --> Download
+    BL --> Download
+    Download --> Extract --> Classifier
+    Classifier -->|Guarda Registro| DB
+    Classifier -->|Evidencia Contrato| IPFS
+    Classifier -->|Slew Command| SlewBridge
+```
+
 ---
 
 ## 🛠️ Requisitos e Instalación de Dependencias

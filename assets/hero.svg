@@ -38,6 +38,40 @@
     </filter>
   </defs>
 
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 1.0; }
+    }
+    @keyframes sweep {
+      0% { transform: skewX(-4deg) rotate(-1deg); }
+      50% { transform: skewX(4deg) rotate(1deg); }
+      100% { transform: skewX(-4deg) rotate(-1deg); }
+    }
+    @keyframes satellite-shake {
+      0%, 100% { transform: translate(140px, 170px) scale(0.8) rotate(0deg); }
+      50% { transform: translate(140px, 166px) scale(0.8) rotate(1.5deg); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    .star-slow { animation: pulse 4s infinite ease-in-out; }
+    .star-fast { animation: pulse 2s infinite ease-in-out; }
+    .star-medium { animation: pulse 3s infinite ease-in-out; }
+    .scanning-beam {
+      animation: sweep 7s infinite ease-in-out;
+      transform-origin: 200px 320px;
+    }
+    .satellite-body {
+      animation: satellite-shake 5s infinite ease-in-out;
+      transform-origin: center;
+    }
+    .status-dot {
+      animation: blink 1.5s infinite ease-in-out;
+    }
+  </style>
+
   <!-- Background -->
   <rect width="800" height="300" fill="url(#bgGrad)"/>
 
@@ -55,12 +89,12 @@
   </g>
   
   <g fill="#d4af37" fill-opacity="0.6">
-    <circle cx="680" cy="80" r="3" />
-    <circle cx="720" cy="140" r="4.5" fill="#8e44ad" filter="url(#glow)"/>
-    <circle cx="650" cy="200" r="3" />
-    <circle cx="600" cy="100" r="4.5" fill="#8e44ad" filter="url(#glow)"/>
-    <circle cx="620" cy="230" r="2.5" />
-    <circle cx="750" cy="220" r="3.5" />
+    <circle cx="680" cy="80" r="3" class="star-slow"/>
+    <circle cx="720" cy="140" r="4.5" fill="#8e44ad" filter="url(#glow)" class="star-fast"/>
+    <circle cx="650" cy="200" r="3" class="star-medium"/>
+    <circle cx="600" cy="100" r="4.5" fill="#8e44ad" filter="url(#glow)" class="star-slow"/>
+    <circle cx="620" cy="230" r="2.5" class="star-medium"/>
+    <circle cx="750" cy="220" r="3.5" class="star-fast"/>
   </g>
 
   <!-- Spiral Nebula (Background Detail) -->
@@ -80,10 +114,10 @@
   <circle cx="200" cy="320" r="280" fill="none" stroke="url(#purpleGrad)" stroke-width="0.8" opacity="0.1" />
 
   <!-- Scanning Beam / Pyramid -->
-  <polygon points="120,320 280,320 480,105 470,105" fill="url(#signalGrad)" opacity="0.35"/>
+  <polygon points="120,320 280,320 480,105 470,105" fill="url(#signalGrad)" opacity="0.35" class="scanning-beam"/>
 
   <!-- Satellite / Space Observatory Receiver (Foreground Left) -->
-  <g transform="translate(140, 170) scale(0.8)">
+  <g class="satellite-body">
     <!-- Stand -->
     <rect x="70" y="80" width="10" height="40" fill="#1b1130" stroke="url(#goldGrad)" stroke-width="1.5"/>
     <path d="M 40 120 L 110 120 L 75 80 Z" fill="#0c0717" stroke="url(#goldGrad)" stroke-width="1.5"/>
@@ -123,7 +157,7 @@
 
   <!-- Status indicators -->
   <g transform="translate(260, 240)">
-    <circle cx="10" cy="10" r="5" fill="#bf55ec" filter="url(#glow)"/>
+    <circle cx="10" cy="10" r="5" fill="#bf55ec" filter="url(#glow)" class="status-dot"/>
     <text x="25" y="14" font-family="monospace" font-size="12" fill="#bf55ec" font-weight="bold">
       DAEMON ENGINE: RUNNING (AUTO-GAME DETECT ON)
     </text>
