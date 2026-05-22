@@ -1,98 +1,131 @@
+![Hero Banner](assets/hero.svg)
+
 # OmniSky Miner 🛰️
 
-> Autonomous cosmic data mining station. Hunts for technosignatures and astronomical anomalies 24/7.
+> Estación autónoma de minería de datos cósmicos. Diseñada para buscar tecnofirmas (SETI) y anomalías astrofísicas de manera ininterrumpida las 24 horas, los 7 días de la semana.
 
-## Quick Start
+---
+
+## 🚀 Guía de Inicio Rápido
+
+Para levantar toda la suite (API backend, demonio de fondo y la interfaz web) ejecuta el script unificado:
 
 ```powershell
-# Start everything (API + Daemon + UI)
+# Levantar el stack completo
 cd scripts
 .\run_all.ps1
 ```
 
-Then open: http://127.0.0.1:8000
+Una vez iniciado, abre tu navegador web en: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
-## Features
+---
 
-### 🔬 Research Station
-- **Multi-Source Discovery**: Pluggable data sources (VLASS, Breakthrough Listen)
-- **ML Triage**: Local RandomForest classifier for event scoring
-- **Semantic Search**: SQLite FTS5 full-text search
-- **Clustering**: DBSCAN hotspot detection
-- **Gamification**: Research missions with XP rewards
+## 🔬 Características de la Estación
 
-### 👻 Daemon Mode
-Runs silently in background, auto-pauses when you game.
+### 1. Estación de Investigación (Research Station)
+*   **Descubrimiento Multi-Fuente:** Conectores modulares a repositorios de datos astrofísicos reales como **VLASS** (VLA Sky Survey) y **Breakthrough Listen** (Green Bank / Parkes).
+*   **Triage con Machine Learning:** Clasificador local *RandomForest* entrenado automáticamente para puntuar señales candidatas y descartar interferencias antropogénicas (RFI).
+*   **Búsqueda Semántica:** Buscador de texto completo integrado mediante bases de datos SQLite FTS5 para agrupar reportes astrofísicos históricos.
+*   **Agrupamiento Espacial (Clustering):** Algoritmo DBSCAN para detectar puntos calientes (hotspots) de señales sospechosas recurrentes en coordenadas celestes.
+*   **Gamificación Científica:** Misiones de investigación interactivas con recompensas de XP para motivar al operador humano en el análisis visual.
+
+### 2. Modo Demonio Inteligente (Daemon Mode)
+*   Ejecución silenciosa en segundo plano con **Zero-Waste Policy** (Aprovechamiento al máximo de ciclos inactivos de CPU/GPU).
+*   **Detección de Juegos/Apps Pesadas:** Pausa la minería automáticamente si abres juegos o software de renderizado intensivo para no afectar el rendimiento del PC.
+*   Detecta procesos como: `GTA5.exe`, `Cyberpunk2077.exe`, `blender.exe`, `Adobe Premiere Pro.exe`, etc.
+*   Instalación del agente como servicio de Windows:
+    ```powershell
+    .\scripts\install_service_windows.ps1
+    ```
+
+### 3. Centro de Comando Web (Command Center)
+*   Dashboard moderno con HUD en tiempo real.
+*   Explorador de eventos cósmicos y descargas.
+*   Laboratorio de Audio: Generación de audio envolvente a partir de señales de radio (inmersión sonora) y espectrogramas interactivos.
+
+### 4. Contrato de Evidencia (Evidence Contract)
+Para asegurar la calidad científica, cada hallazgo verificado en la base de datos debe generar de forma estricta:
+*   `annotated.png`: Firma visual / espectrograma anotado.
+*   `evidence.json`: Metadatos técnicos (frecuencia, drift rate, SNR, coordenadas).
+*   `report.md`: Análisis preliminar en Markdown formateado.
+
+---
+
+## 🏛️ Arquitectura del Sistema
+
+El siguiente diagrama detalla cómo interactúan el agente Windows de escritorio en C#, la base de datos SQLite local, los módulos de análisis en Python y la interfaz web del operador:
+
+```mermaid
+graph TD
+    %% Styling
+    classDef ui fill:#1b113a,stroke:#da70d6,stroke-width:2px,color:#fff;
+    classDef backend fill:#120721,stroke:#8e44ad,stroke-width:2px,color:#fff;
+    classDef agent fill:#2c1b4d,stroke:#d4af37,stroke-width:2px,color:#fff;
+    classDef db fill:#08040f,stroke:#da70d6,stroke-width:1px,color:#fff;
+    
+    A["Interfaz Web (Vite + JS)<br/>(Command Center HUD)"] :::ui
+    B["FastAPI Backend (Python)<br/>(Control de Flujo e Ingesta)"] :::backend
+    C["Agente Windows (C# .NET 8)<br/>(Monitor de Procesos y Bandeja System Tray)"] :::agent
+    D["SQLite Database (Schema v5)<br/>(Sesiones, Alertas, ML Runs y Eventos)"] :::db
+    E["Pipeline de Triage (Scikit-Learn)<br/>(ML RF Model / Heurísticas)"] :::backend
+    
+    A <-->|REST API / WebSockets| B
+    C <-->|Daemon Control API / status| B
+    B <-->|Lectura/Escritura SQL| D
+    B -->|Score de Señales| E
+    
+    subgraph Frontend & UI
+        A
+    end
+    
+    subgraph Ingesta y Clasificación
+        B
+        E
+    end
+    
+    subgraph Integración de Sistema
+        C
+        D
+    end
+```
+
+---
+
+## 🛠️ Requisitos e Instalación de Dependencias
+
+El entorno ha sido completamente preparado y verificado en esta máquina:
+*   **Python 3.11+:** Entorno virtual configurado en `venv/`.
+*   **Dependencias Python:** Instaladas automáticamente (`streamlit`, `scikit-learn`, `astropy`, `scipy`, `pandas`, `plotly`, `fastapi`, `uvicorn`, entre otras).
+*   **SDK .NET 8.0:** Instalado y utilizado para compilar el agente de bandeja en C#. *(Se solucionó el error de compilación CS7064 removiendo la referencia al icono físico ausente).*
+*   **Node.js / npm:** Utilizado para compilar la interfaz de usuario en `ui/dist`.
+
+---
+
+## 🚦 Verificación y Pruebas del Sistema
+
+Puedes correr la suite de verificación completa para auditar la integridad del sistema:
 
 ```powershell
-# Install auto-start
-.\scripts\install_service_windows.ps1
+# Habilitar codificación UTF-8 en PowerShell para visualizar emojis de reporte correctamente
+$env:PYTHONIOENCODING = "utf-8"
+
+# 1. Verificar base de datos e instalación básica
+venv\Scripts\python.exe verify_install.py
+
+# 2. Verificar base de datos, migraciones (v1 a v5) y entrenamiento ML RandomForest
+venv\Scripts\python.exe verify_pro_features.py
+
+# 3. Verificar el pipeline end-to-end de descarga, limpieza y triaje de archivos FITS/H5
+venv\Scripts\python.exe verify_run.py
+
+# 4. Verificar síntesis de audio a WAV para análisis inmersivo de espectros
+venv\Scripts\python.exe verify_immersion.py
+
+# 5. Verificar sensor de pausa por consumo y carga pesada (Daemon Engine)
+venv\Scripts\python.exe verify_daemon_pause.py
 ```
 
-Detects: GTA5, Cyberpunk, Blender, Premiere, etc.
+*Todos los scripts de verificación se ejecutan actualmente con un 100% de éxito (PASS).*
 
-### 🎛️ Command Center
-Modern web UI with:
-- Real-time status HUD
-- Event Explorer
-- Audio Lab (spectrogram)
-- Live operations feed
-
-### 📄 Evidence Contract
-Every REAL event MUST have:
-- `annotated.png` (visual evidence)
-- `evidence.json` (metadata)
-- `report.md` (analysis)
-
-Missing evidence? Run backfill:
-```bash
-python scripts/backfill_evidence.py --all-missing
-```
-
-## Architecture
-
-```
-omnisky-miner/
-├── api/              # FastAPI backend
-├── ui/               # HTML/CSS/JS frontend
-├── agent-win/        # C# Windows tray agent
-├── modules/          # Python core
-├── services/         # Daemon scripts
-├── scripts/          # Utilities
-└── OMNISKY_DATA/     # Data storage
-```
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/status` | GET | Daemon state |
-| `/pause` | POST | Pause processing |
-| `/resume` | POST | Resume |
-| `/events` | GET | Query events |
-| `/logs/tail` | GET | Recent logs |
-
-## Configuration
-
-Edit `config.py`:
-- `ENABLED_SOURCES`: Active data sources
-- `HEAVY_PROCESS_NAMES`: Games/apps that trigger pause
-- `PAUSE_CPU_PCT`: CPU threshold (default 70%)
-
-## Verification
-
-```bash
-python verify_pro_features.py      # Core systems
-python verify_features2.py         # Research station
-python verify_evidence_contract.py # Evidence system
-```
-
-## Requirements
-
-- Python 3.9+
-- .NET 8 SDK (optional, for C# agent)
-- Node.js (optional, for UI build)
-
-## License
-
-MIT
+---
+*OmniSky Miner es software libre enfocado en democratizar la investigación astrofísica amateur y la búsqueda de vida inteligente.*

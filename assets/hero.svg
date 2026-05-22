@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#140a28"/>
+      <stop offset="60%" stop-color="#070312"/>
+      <stop offset="100%" stop-color="#030107"/>
+    </radialGradient>
+    
+    <!-- Gold Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdf0cd"/>
+      <stop offset="50%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#aa7c11"/>
+    </linearGradient>
+    
+    <!-- Purple/Magenta Glow -->
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#bf55ec"/>
+      <stop offset="50%" stop-color="#8e44ad"/>
+      <stop offset="100%" stop-color="#2c003e"/>
+    </linearGradient>
+
+    <!-- Signal Gradient -->
+    <linearGradient id="signalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#8e44ad" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+    
+    <!-- Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="300" fill="url(#bgGrad)"/>
+
+  <!-- Neural Network / Autonomous Nodes -->
+  <g stroke="#8e44ad" stroke-opacity="0.25" stroke-width="0.75">
+    <line x1="680" y1="80" x2="720" y2="140"/>
+    <line x1="720" y1="140" x2="650" y2="200"/>
+    <line x1="650" y1="200" x2="680" y2="80"/>
+    <line x1="680" y1="80" x2="600" y2="100"/>
+    <line x1="650" y1="200" x2="600" y2="100"/>
+    <line x1="600" y1="100" x2="620" y2="230"/>
+    <line x1="650" y1="200" x2="620" y2="230"/>
+    <line x1="720" y1="140" x2="750" y2="220"/>
+    <line x1="650" y1="200" x2="750" y2="220"/>
+  </g>
+  
+  <g fill="#d4af37" fill-opacity="0.6">
+    <circle cx="680" cy="80" r="3" />
+    <circle cx="720" cy="140" r="4.5" fill="#8e44ad" filter="url(#glow)"/>
+    <circle cx="650" cy="200" r="3" />
+    <circle cx="600" cy="100" r="4.5" fill="#8e44ad" filter="url(#glow)"/>
+    <circle cx="620" cy="230" r="2.5" />
+    <circle cx="750" cy="220" r="3.5" />
+  </g>
+
+  <!-- Spiral Nebula (Background Detail) -->
+  <g transform="translate(480, 110) scale(0.7)" opacity="0.45">
+    <!-- Starfield behind nebula -->
+    <circle cx="-50" cy="-30" r="1" fill="#fff" />
+    <circle cx="80" cy="50" r="1.5" fill="#fff" />
+    <path d="M 0 0 C 40 -60, 120 -60, 160 0 C 120 60, 40 60, 0 0 Z" fill="url(#purpleGrad)" opacity="0.3" filter="url(#glow)"/>
+    <path d="M 20 10 C 50 -30, 90 -30, 120 10 C 90 40, 50 40, 20 10 Z" fill="url(#goldGrad)" opacity="0.2" filter="url(#glow)"/>
+    <!-- Center Core -->
+    <circle cx="70" cy="5" r="10" fill="#fff" filter="url(#glow)"/>
+  </g>
+
+  <!-- Signal Radar Ring / Waves -->
+  <circle cx="200" cy="320" r="180" fill="none" stroke="url(#purpleGrad)" stroke-width="1.5" opacity="0.2" />
+  <circle cx="200" cy="320" r="230" fill="none" stroke="url(#purpleGrad)" stroke-width="1.2" opacity="0.15" />
+  <circle cx="200" cy="320" r="280" fill="none" stroke="url(#purpleGrad)" stroke-width="0.8" opacity="0.1" />
+
+  <!-- Scanning Beam / Pyramid -->
+  <polygon points="120,320 280,320 480,105 470,105" fill="url(#signalGrad)" opacity="0.35"/>
+
+  <!-- Satellite / Space Observatory Receiver (Foreground Left) -->
+  <g transform="translate(140, 170) scale(0.8)">
+    <!-- Stand -->
+    <rect x="70" y="80" width="10" height="40" fill="#1b1130" stroke="url(#goldGrad)" stroke-width="1.5"/>
+    <path d="M 40 120 L 110 120 L 75 80 Z" fill="#0c0717" stroke="url(#goldGrad)" stroke-width="1.5"/>
+    
+    <!-- Dish Rotation Arm -->
+    <circle cx="75" cy="80" r="12" fill="url(#purpleGrad)" stroke="url(#goldGrad)" stroke-width="1.5"/>
+    <rect x="68" y="50" width="14" height="30" fill="url(#goldGrad)"/>
+    
+    <!-- Main Reflector Bowl -->
+    <path d="M 10 30 Q 75 85 140 30 C 120 -5, 30 -5, 10 30 Z" fill="url(#goldGrad)" filter="url(#glow)"/>
+    <path d="M 20 30 Q 75 75 130 30 Z" fill="#0f0724"/>
+    
+    <!-- Sub-reflector legs -->
+    <line x1="15" y1="25" x2="75" y2="-15" stroke="url(#goldGrad)" stroke-width="1.5"/>
+    <line x1="135" y1="25" x2="75" y2="-15" stroke="url(#goldGrad)" stroke-width="1.5"/>
+    <circle cx="75" cy="-15" r="5" fill="#bf55ec"/>
+  </g>
+
+  <!-- Typography / Titles -->
+  <g transform="translate(260, 90)">
+    <!-- Label -->
+    <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#d4af37" letter-spacing="4" opacity="0.9">
+      SETI &amp; ASTROPHYSICS AUTONOMOUS STATION
+    </text>
+    <!-- Main Title -->
+    <text x="-2" y="45" font-family="'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="800" fill="url(#purpleGrad)" letter-spacing="1" filter="url(#glow)">
+      OmniSky Miner
+    </text>
+    <text x="-2" y="45" font-family="'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="800" fill="none" stroke="url(#goldGrad)" stroke-width="0.5" letter-spacing="1">
+      OmniSky Miner
+    </text>
+    <!-- Subtitle description -->
+    <text x="0" y="75" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="300" fill="#ffffff" opacity="0.75" letter-spacing="0.5">
+      Minería virtual astrofísica y detección de anomalías
+    </text>
+  </g>
+
+  <!-- Status indicators -->
+  <g transform="translate(260, 240)">
+    <circle cx="10" cy="10" r="5" fill="#bf55ec" filter="url(#glow)"/>
+    <text x="25" y="14" font-family="monospace" font-size="12" fill="#bf55ec" font-weight="bold">
+      DAEMON ENGINE: RUNNING (AUTO-GAME DETECT ON)
+    </text>
+  </g>
+</svg>

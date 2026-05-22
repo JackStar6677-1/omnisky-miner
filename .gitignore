@@ -18,3 +18,16 @@ omnisky.db
 
 # Streamlit
 .streamlit/
+
+# C# Build Artifacts
+**/bin/
+**/obj/
+dist/
+
+# Node.js
+**/node_modules/
+ui/dist/
+
+# Test Outputs
+OUTPUT/
+
