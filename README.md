@@ -180,3 +180,5 @@ venv\Scripts\python.exe tests/verify_daemon_pause.py
 
 ---
 *OmniSky Miner es software libre enfocado en democratizar la investigación astrofísica amateur y la búsqueda de vida inteligente.*
+
+<!-- Updated for 2026 active baseline maintenance -->
