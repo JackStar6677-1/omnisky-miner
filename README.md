@@ -147,8 +147,8 @@ flowchart TD
 El entorno ha sido completamente preparado y verificado en esta máquina:
 *   **Python 3.11+:** Entorno virtual configurado en `venv/`.
 *   **Dependencias Python:** Instaladas automáticamente (`streamlit`, `scikit-learn`, `astropy`, `scipy`, `pandas`, `plotly`, `fastapi`, `uvicorn`, entre otras).
-*   **SDK .NET 8.0:** Instalado y utilizado para compilar el agente de bandeja en C#. *(Se solucionó el error de compilación CS7064 removiendo la referencia al icono físico ausente).*
-*   **Node.js / npm:** Utilizado para compilar la interfaz de usuario en `ui/dist`.
+*   **SDK .NET 8.0:** Instalado y utilizado para compilar el agente de bandeja en C#. *(Se solucionó el error de compilación CS7064 removiendo la referencia al icon físico ausente).*
+*   **Node.js / npm:** Utilizado para compilar la interfaz de user en `ui/dist`.
 
 ---
 
@@ -166,7 +166,7 @@ venv\Scripts\python.exe tests/verify_install.py
 # 2. Verificar base de datos, migraciones (v1 a v5) y entrenamiento ML RandomForest
 venv\Scripts\python.exe tests/verify_pro_features.py
 
-# 3. Verificar el pipeline end-to-end de descarga, limpieza y triaje de archivos FITS/H5
+# 3. Verificar el pipeline end-to-end de descarga, limpieza y triaje de files FITS/H5
 venv\Scripts\python.exe tests/verify_run.py
 
 # 4. Verificar síntesis de audio a WAV para análisis inmersivo de espectros
